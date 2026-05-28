@@ -1,0 +1,6 @@
+/vendor/
+/public/uploads/
+/.repo_git/
+.env
+.env.*
+!.env.example
