@@ -13,13 +13,16 @@ class EmailService
 {
     public function send(?int $ticketId, string $to, string $subject, string $body): bool
     {
-        $status = 'logged';
+        $status = 'failed';
         $error = null;
 
         try {
             if ($this->phpMailerAvailable()) {
+                $this->validateConfiguration();
+
                 $mail = new PHPMailer(true);
                 $mail->CharSet = 'UTF-8';
+
                 if (SMTP_ENABLED) {
                     $mail->isSMTP();
                     $mail->Host = SMTP_HOST;
@@ -43,7 +46,12 @@ class EmailService
                 }
 
                 $headers = 'From: ' . MAIL_FROM . "\r\nContent-Type: text/html; charset=UTF-8\r\n";
-                $status = @mail($to, $subject, $body, $headers) ? 'sent' : 'logged';
+                if (@mail($to, $subject, $body, $headers)) {
+                    $status = 'sent';
+                } else {
+                    $lastError = error_get_last();
+                    throw new RuntimeException($lastError['message'] ?? 'PHP mail() returned false. Enable SMTP or configure sendmail in php.ini.');
+                }
             }
         } catch (Throwable $exception) {
             $status = 'failed';
@@ -68,6 +76,8 @@ class EmailService
             'ict_notification_email' => ICT_NOTIFICATION_EMAIL,
             'phpmailer_available' => $this->phpMailerAvailable() ? 'Yes' : 'No',
             'openssl_loaded' => extension_loaded('openssl') ? 'Yes' : 'No',
+            'active_transport' => $this->activeTransport(),
+            'smtp_ready' => $this->smtpReady() ? 'Yes' : 'No',
         ];
     }
 
@@ -173,6 +183,57 @@ class EmailService
         }
 
         return class_exists(PHPMailer::class);
+    }
+
+    private function validateConfiguration(): void
+    {
+        if (MAIL_FROM === '' || !filter_var(MAIL_FROM, FILTER_VALIDATE_EMAIL)) {
+            throw new RuntimeException('MAIL_FROM must be a valid email address.');
+        }
+
+        if (!SMTP_ENABLED) {
+            return;
+        }
+
+        if (SMTP_HOST === '') {
+            throw new RuntimeException('SMTP_ENABLED is true, but SMTP_HOST is empty.');
+        }
+
+        if (SMTP_PORT <= 0) {
+            throw new RuntimeException('SMTP_ENABLED is true, but SMTP_PORT is invalid.');
+        }
+
+        if (SMTP_USERNAME === '') {
+            throw new RuntimeException('SMTP_ENABLED is true, but SMTP_USERNAME is empty.');
+        }
+
+        if (SMTP_PASSWORD === '') {
+            throw new RuntimeException('SMTP_ENABLED is true, but SMTP_PASSWORD is empty. For Gmail or Google Workspace, use an app password.');
+        }
+
+        if (SMTP_ENCRYPTION !== '' && !extension_loaded('openssl')) {
+            throw new RuntimeException('SMTP encryption is configured, but the PHP openssl extension is not loaded.');
+        }
+    }
+
+    private function activeTransport(): string
+    {
+        if (SMTP_ENABLED) {
+            return $this->phpMailerAvailable() ? 'SMTP via PHPMailer' : 'SMTP unavailable: PHPMailer missing';
+        }
+
+        return $this->phpMailerAvailable() ? 'PHP mail via PHPMailer' : 'PHP mail fallback';
+    }
+
+    private function smtpReady(): bool
+    {
+        return SMTP_ENABLED
+            && $this->phpMailerAvailable()
+            && SMTP_HOST !== ''
+            && SMTP_PORT > 0
+            && SMTP_USERNAME !== ''
+            && SMTP_PASSWORD !== ''
+            && (SMTP_ENCRYPTION === '' || extension_loaded('openssl'));
     }
 
     private function log(?int $ticketId, string $to, string $subject, string $body, string $status, ?string $error): void
