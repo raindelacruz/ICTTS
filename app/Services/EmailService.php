@@ -11,6 +11,9 @@ use Throwable;
 
 class EmailService
 {
+    private ?bool $phpMailerAvailable = null;
+    private ?string $phpMailerLoadError = null;
+
     public function send(?int $ticketId, string $to, string $subject, string $body): bool
     {
         $status = 'failed';
@@ -42,7 +45,7 @@ class EmailService
                 $status = 'sent';
             } else {
                 if (SMTP_ENABLED) {
-                    throw new RuntimeException('SMTP is enabled, but PHPMailer is not installed or cannot be loaded. Run composer install on the server so vendor/autoload.php exists.');
+                    throw new RuntimeException($this->phpMailerMissingMessage());
                 }
 
                 $headers = 'From: ' . MAIL_FROM . "\r\nContent-Type: text/html; charset=UTF-8\r\n";
@@ -75,6 +78,7 @@ class EmailService
             'mail_from_name' => MAIL_FROM_NAME,
             'ict_notification_email' => ICT_NOTIFICATION_EMAIL,
             'phpmailer_available' => $this->phpMailerAvailable() ? 'Yes' : 'No',
+            'phpmailer_error' => $this->phpMailerLoadError ?? '',
             'openssl_loaded' => extension_loaded('openssl') ? 'Yes' : 'No',
             'active_transport' => $this->activeTransport(),
             'smtp_ready' => $this->smtpReady() ? 'Yes' : 'No',
@@ -177,12 +181,54 @@ class EmailService
 
     private function phpMailerAvailable(): bool
     {
+        if ($this->phpMailerAvailable !== null) {
+            return $this->phpMailerAvailable;
+        }
+
         $autoload = __DIR__ . '/../../vendor/autoload.php';
         if (is_file($autoload)) {
             require_once $autoload;
         }
 
-        return class_exists(PHPMailer::class);
+        if (!class_exists(PHPMailer::class)) {
+            $this->loadBundledPhpMailer();
+        }
+
+        $this->phpMailerAvailable = class_exists(PHPMailer::class);
+
+        if (!$this->phpMailerAvailable && $this->phpMailerLoadError === null) {
+            $this->phpMailerLoadError = $this->phpMailerMissingMessage();
+        }
+
+        return $this->phpMailerAvailable;
+    }
+
+    private function loadBundledPhpMailer(): void
+    {
+        $sourceDir = __DIR__ . '/../../vendor/phpmailer/phpmailer/src';
+        $requiredFiles = [
+            $sourceDir . '/Exception.php',
+            $sourceDir . '/PHPMailer.php',
+            $sourceDir . '/SMTP.php',
+        ];
+
+        foreach ($requiredFiles as $file) {
+            if (!is_file($file)) {
+                $this->phpMailerLoadError = $this->phpMailerMissingMessage();
+                return;
+            }
+        }
+
+        foreach ($requiredFiles as $file) {
+            require_once $file;
+        }
+    }
+
+    private function phpMailerMissingMessage(): string
+    {
+        $vendorPath = realpath(__DIR__ . '/../../vendor') ?: __DIR__ . '/../../vendor';
+
+        return 'SMTP is enabled, but PHPMailer is not installed or cannot be loaded. Run composer install on the server from the project root, or upload the vendor folder, so ' . $vendorPath . '/autoload.php and vendor/phpmailer/phpmailer/src exist.';
     }
 
     private function validateConfiguration(): void
