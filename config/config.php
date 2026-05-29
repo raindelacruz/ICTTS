@@ -5,7 +5,36 @@ declare(strict_types=1);
 function env_value(string $key, string $default = ''): string
 {
     $value = getenv($key);
-    return $value === false ? $default : $value;
+    if ($value === false && isset($_ENV[$key])) {
+        $value = $_ENV[$key];
+    }
+    if ($value === false && isset($_SERVER[$key])) {
+        $value = $_SERVER[$key];
+    }
+
+    if ($value === false || $value === null) {
+        return $default;
+    }
+
+    $value = trim((string) $value);
+    if (strlen($value) >= 2) {
+        $first = $value[0];
+        $last = $value[strlen($value) - 1];
+        if (($first === '"' && $last === '"') || ($first === "'" && $last === "'")) {
+            $value = substr($value, 1, -1);
+        }
+    }
+
+    return $value;
+}
+
+function smtp_password_value(string $host, string $password): string
+{
+    if (stripos($host, 'gmail.com') !== false) {
+        return preg_replace('/\s+/', '', $password) ?? $password;
+    }
+
+    return $password;
 }
 
 define('APP_NAME', 'ICTSD Ticketing System');
@@ -27,7 +56,7 @@ define('SMTP_ENABLED', filter_var(env_value('SMTP_ENABLED', 'true'), FILTER_VALI
 define('SMTP_HOST', env_value('SMTP_HOST', 'smtp.gmail.com'));
 define('SMTP_PORT', (int) env_value('SMTP_PORT', '587'));
 define('SMTP_USERNAME', env_value('SMTP_USERNAME', 'tech.support@nfa.gov.ph'));
-define('SMTP_PASSWORD', env_value('SMTP_PASSWORD'));
+define('SMTP_PASSWORD', smtp_password_value(SMTP_HOST, env_value('SMTP_PASSWORD')));
 define('SMTP_ENCRYPTION', env_value('SMTP_ENCRYPTION', 'tls'));
 
 date_default_timezone_set(APP_TIMEZONE);
