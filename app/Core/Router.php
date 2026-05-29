@@ -73,6 +73,7 @@ class Router
             ['POST', 'libraries/offices/{id}/delete', [LibraryController::class, 'deleteOffice']],
             ['GET', 'reports', [ReportController::class, 'index']],
             ['GET', 'logs', [LogController::class, 'index']],
+            ['POST', 'logs/email-test', [LogController::class, 'testEmail']],
         ];
 
         foreach ($routes as [$routeMethod, $pattern, $handler]) {

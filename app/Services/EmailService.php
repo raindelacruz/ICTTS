@@ -6,6 +6,7 @@ namespace App\Services;
 
 use App\Core\Database;
 use PHPMailer\PHPMailer\PHPMailer;
+use RuntimeException;
 use Throwable;
 
 class EmailService
@@ -37,6 +38,10 @@ class EmailService
                 $mail->send();
                 $status = 'sent';
             } else {
+                if (SMTP_ENABLED) {
+                    throw new RuntimeException('SMTP is enabled, but PHPMailer is not installed or cannot be loaded. Run composer install on the server so vendor/autoload.php exists.');
+                }
+
                 $headers = 'From: ' . MAIL_FROM . "\r\nContent-Type: text/html; charset=UTF-8\r\n";
                 $status = @mail($to, $subject, $body, $headers) ? 'sent' : 'logged';
             }
@@ -47,6 +52,23 @@ class EmailService
 
         $this->log($ticketId, $to, $subject, $body, $status, $error);
         return $status === 'sent';
+    }
+
+    public function diagnostics(): array
+    {
+        return [
+            'smtp_enabled' => SMTP_ENABLED ? 'Yes' : 'No',
+            'smtp_host' => SMTP_HOST,
+            'smtp_port' => (string) SMTP_PORT,
+            'smtp_username' => SMTP_USERNAME,
+            'smtp_password_configured' => SMTP_PASSWORD !== '' ? 'Yes' : 'No',
+            'smtp_encryption' => SMTP_ENCRYPTION !== '' ? SMTP_ENCRYPTION : '(none)',
+            'mail_from' => MAIL_FROM,
+            'mail_from_name' => MAIL_FROM_NAME,
+            'ict_notification_email' => ICT_NOTIFICATION_EMAIL,
+            'phpmailer_available' => $this->phpMailerAvailable() ? 'Yes' : 'No',
+            'openssl_loaded' => extension_loaded('openssl') ? 'Yes' : 'No',
+        ];
     }
 
     public function submissionRequester(array $ticket): void

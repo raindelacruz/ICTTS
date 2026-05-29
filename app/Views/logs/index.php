@@ -32,10 +32,47 @@
         </table></div></div>
     </div>
     <div class="tab-pane fade" id="emails">
+        <div class="row g-3 mb-3">
+            <div class="col-lg-7">
+                <div class="card h-100">
+                    <div class="card-header fw-semibold">Email Configuration</div>
+                    <div class="table-responsive">
+                        <table class="table table-sm mb-0">
+                            <tbody>
+                            <?php foreach ($emailDiagnostics as $label => $value): ?>
+                                <tr>
+                                    <th class="text-nowrap"><?= e(ucwords(str_replace('_', ' ', $label))) ?></th>
+                                    <td><?= e($value) ?></td>
+                                </tr>
+                            <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-5">
+                <div class="card h-100">
+                    <div class="card-header fw-semibold">Send Test Email</div>
+                    <div class="card-body">
+                        <form method="post" action="<?= url('logs/email-test') ?>" class="row g-2">
+                            <?= csrf_field() ?>
+                            <div class="col-12">
+                                <label class="form-label">Recipient email</label>
+                                <input type="email" name="recipient_email" class="form-control" required value="<?= e(current_user()['email'] ?? '') ?>">
+                            </div>
+                            <div class="col-12">
+                                <button class="btn btn-primary">Send Test</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
         <div class="card"><div class="table-responsive"><table class="table table-hover mb-0">
             <thead><tr><th>Date</th><th>Ticket</th><th>Recipient</th><th>Subject</th><th>Status</th><th>Error</th></tr></thead>
             <tbody>
             <?php foreach ($emails as $log): ?><tr><td><?= e($log['created_at']) ?></td><td><?= e((string) $log['ticket_id']) ?></td><td><?= e($log['recipient_email']) ?></td><td><?= e($log['subject']) ?></td><td><?= e($log['status']) ?></td><td><?= e($log['error_message']) ?></td></tr><?php endforeach; ?>
+            <?php if (!$emails): ?><tr><td colspan="6" class="text-center text-muted py-4">No email logs found.</td></tr><?php endif; ?>
             </tbody>
         </table></div></div>
     </div>
