@@ -1,0 +1,7 @@
+/vendor/
+/public/uploads/
+/.repo_git/
+/ictts.sql
+.env
+.env.*
+!.env.example

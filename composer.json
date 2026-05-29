@@ -1,0 +1,9 @@
+{
+  "name": "nfa/ict-ticketing-system",
+  "description": "NFA ICTSD Ticketing System built with PHP MVC, MySQL, Bootstrap, and PHPMailer.",
+  "type": "project",
+  "require": {
+    "php": ">=8.1",
+    "phpmailer/phpmailer": "^6.9"
+  }
+}
