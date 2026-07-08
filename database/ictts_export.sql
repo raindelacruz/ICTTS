@@ -663,13 +663,16 @@ CREATE TABLE `users` (
   `email` varchar(190) NOT NULL,
   `password_hash` varchar(255) NOT NULL,
   `role` enum('technical','unit_head','division_chief','admin') NOT NULL DEFAULT 'technical',
+  `service_category_id` int(10) unsigned DEFAULT NULL,
   `status` enum('active','inactive') NOT NULL DEFAULT 'active',
   `last_login_at` datetime DEFAULT NULL,
   `created_at` datetime NOT NULL DEFAULT current_timestamp(),
   `updated_at` datetime DEFAULT NULL ON UPDATE current_timestamp(),
   PRIMARY KEY (`id`),
   UNIQUE KEY `id_number` (`id_number`),
-  UNIQUE KEY `email` (`email`)
+  UNIQUE KEY `email` (`email`),
+  KEY `users_service_category_idx` (`service_category_id`),
+  CONSTRAINT `users_service_category_fk` FOREIGN KEY (`service_category_id`) REFERENCES `service_categories` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -679,7 +682,7 @@ CREATE TABLE `users` (
 
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
-INSERT INTO `users` VALUES (1,'TECH-001','Temporary Technical User','ICT Support Staff','tech@nfa.gov.ph','$2y$10$atcIkMqtOWtfbckbbDIJG.HQGLdvD0R.jhjDEIj1pNxN/CSl79oQG','technical','inactive',NULL,'2026-05-28 15:19:34',NULL),(2,'HEAD-001','Temporary Unit Head','Unit Head','unithead@nfa.gov.ph','$2y$10$atcIkMqtOWtfbckbbDIJG.HQGLdvD0R.jhjDEIj1pNxN/CSl79oQG','unit_head','inactive',NULL,'2026-05-28 15:19:34',NULL),(3,'CHIEF-001','Temporary Division Chief','Division Chief','chief@nfa.gov.ph','$2y$10$atcIkMqtOWtfbckbbDIJG.HQGLdvD0R.jhjDEIj1pNxN/CSl79oQG','division_chief','inactive',NULL,'2026-05-28 15:19:34',NULL),(4,'ADMIN-001','Temporary Administrator','System Administrator','admin@nfa.gov.ph','$2y$10$atcIkMqtOWtfbckbbDIJG.HQGLdvD0R.jhjDEIj1pNxN/CSl79oQG','admin','inactive',NULL,'2026-05-28 15:19:34',NULL);
+INSERT INTO `users` VALUES (1,'TECH-001','Temporary Technical User','ICT Support Staff','tech@nfa.gov.ph','$2y$10$atcIkMqtOWtfbckbbDIJG.HQGLdvD0R.jhjDEIj1pNxN/CSl79oQG','technical',1,'inactive',NULL,'2026-05-28 15:19:34',NULL),(2,'HEAD-001','Temporary Unit Head','Unit Head','unithead@nfa.gov.ph','$2y$10$atcIkMqtOWtfbckbbDIJG.HQGLdvD0R.jhjDEIj1pNxN/CSl79oQG','unit_head',1,'inactive',NULL,'2026-05-28 15:19:34',NULL),(3,'CHIEF-001','Temporary Division Chief','Division Chief','chief@nfa.gov.ph','$2y$10$atcIkMqtOWtfbckbbDIJG.HQGLdvD0R.jhjDEIj1pNxN/CSl79oQG','division_chief',NULL,'inactive',NULL,'2026-05-28 15:19:34',NULL),(4,'ADMIN-001','Temporary Administrator','System Administrator','admin@nfa.gov.ph','$2y$10$atcIkMqtOWtfbckbbDIJG.HQGLdvD0R.jhjDEIj1pNxN/CSl79oQG','admin',NULL,'inactive',NULL,'2026-05-28 15:19:34',NULL);
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;

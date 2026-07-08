@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jul 08, 2026 at 04:45 AM
+-- Generation Time: Jul 08, 2026 at 05:47 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -61,7 +61,8 @@ INSERT INTO `activity_logs` (`id`, `user_id`, `actor_name`, `action`, `entity_ty
 (15, 5, 'Rainier John Dela Cruz', 'User logout', 'user', '5', NULL, '192.168.108.254', '2026-07-08 10:08:49'),
 (16, 4, 'Administrator', 'User login', 'user', '4', NULL, '192.168.108.254', '2026-07-08 10:09:08'),
 (17, 4, 'Administrator', 'User login', 'user', '4', NULL, '::1', '2026-07-08 10:20:17'),
-(18, 4, 'Administrator', 'User login', 'user', '4', NULL, '192.168.108.254', '2026-07-08 10:20:42');
+(18, 4, 'Administrator', 'User login', 'user', '4', NULL, '192.168.108.254', '2026-07-08 10:20:42'),
+(19, 4, 'Administrator', 'User login', 'user', '4', NULL, '::1', '2026-07-08 10:52:35');
 
 -- --------------------------------------------------------
 
@@ -514,6 +515,7 @@ CREATE TABLE `users` (
   `email` varchar(190) NOT NULL,
   `password_hash` varchar(255) NOT NULL,
   `role` enum('technical','unit_head','division_chief','admin') NOT NULL DEFAULT 'technical',
+  `service_category_id` int(10) UNSIGNED DEFAULT NULL,
   `status` enum('active','inactive') NOT NULL DEFAULT 'active',
   `last_login_at` datetime DEFAULT NULL,
   `created_at` datetime NOT NULL DEFAULT current_timestamp(),
@@ -524,12 +526,12 @@ CREATE TABLE `users` (
 -- Dumping data for table `users`
 --
 
-INSERT INTO `users` (`id`, `id_number`, `name`, `position`, `email`, `password_hash`, `role`, `status`, `last_login_at`, `created_at`, `updated_at`) VALUES
-(1, 'TECH-001', 'Temporary Technical User', 'ICT Support Staff', 'tech@nfa.gov.ph', '$2y$10$atcIkMqtOWtfbckbbDIJG.HQGLdvD0R.jhjDEIj1pNxN/CSl79oQG', 'technical', 'active', NULL, '2026-05-28 15:19:34', NULL),
-(2, 'HEAD-001', 'Temporary Unit Head', 'Unit Head', 'unithead@nfa.gov.ph', '$2y$10$atcIkMqtOWtfbckbbDIJG.HQGLdvD0R.jhjDEIj1pNxN/CSl79oQG', 'unit_head', 'active', NULL, '2026-05-28 15:19:34', NULL),
-(3, 'CHIEF-001', 'Temporary Division Chief', 'Division Chief', 'chief@nfa.gov.ph', '$2y$10$atcIkMqtOWtfbckbbDIJG.HQGLdvD0R.jhjDEIj1pNxN/CSl79oQG', 'division_chief', 'active', NULL, '2026-05-28 15:19:34', NULL),
-(4, 'ADMIN-001', 'Administrator', 'System Administrator', 'tech.support@nfa.gov.ph', '$2y$10$atcIkMqtOWtfbckbbDIJG.HQGLdvD0R.jhjDEIj1pNxN/CSl79oQG', 'admin', 'active', '2026-07-08 10:20:42', '2026-05-28 15:19:34', '2026-07-08 10:20:42'),
-(5, '939908', 'Rainier John Dela Cruz', 'Information Systems Analysts III', 'rainier.delacruz@nfa.gov.ph', '$2y$10$YXogS8D8nHdmumUbDOgETOv1ks7obEWnAlmnuo34n0E9j2cDkP2tO', 'unit_head', 'active', '2026-07-08 09:57:37', '2026-07-08 09:54:22', '2026-07-08 09:57:37');
+INSERT INTO `users` (`id`, `id_number`, `name`, `position`, `email`, `password_hash`, `role`, `service_category_id`, `status`, `last_login_at`, `created_at`, `updated_at`) VALUES
+(1, 'TECH-001', 'Temporary Technical User', 'ICT Support Staff', 'tech@nfa.gov.ph', '$2y$10$atcIkMqtOWtfbckbbDIJG.HQGLdvD0R.jhjDEIj1pNxN/CSl79oQG', 'technical', NULL, 'active', NULL, '2026-05-28 15:19:34', NULL),
+(2, 'HEAD-001', 'Temporary Unit Head', 'Unit Head', 'unithead@nfa.gov.ph', '$2y$10$atcIkMqtOWtfbckbbDIJG.HQGLdvD0R.jhjDEIj1pNxN/CSl79oQG', 'unit_head', NULL, 'active', NULL, '2026-05-28 15:19:34', NULL),
+(3, 'CHIEF-001', 'Temporary Division Chief', 'Division Chief', 'chief@nfa.gov.ph', '$2y$10$atcIkMqtOWtfbckbbDIJG.HQGLdvD0R.jhjDEIj1pNxN/CSl79oQG', 'division_chief', NULL, 'active', NULL, '2026-05-28 15:19:34', NULL),
+(4, 'ADMIN-001', 'Administrator', 'System Administrator', 'tech.support@nfa.gov.ph', '$2y$10$atcIkMqtOWtfbckbbDIJG.HQGLdvD0R.jhjDEIj1pNxN/CSl79oQG', 'admin', NULL, 'active', '2026-07-08 10:52:35', '2026-05-28 15:19:34', '2026-07-08 10:52:35'),
+(5, '939908', 'Rainier John Dela Cruz', 'Information Systems Analysts III', 'rainier.delacruz@nfa.gov.ph', '$2y$10$YXogS8D8nHdmumUbDOgETOv1ks7obEWnAlmnuo34n0E9j2cDkP2tO', 'unit_head', NULL, 'active', '2026-07-08 09:57:37', '2026-07-08 09:54:22', '2026-07-08 09:57:37');
 
 --
 -- Indexes for dumped tables
@@ -698,7 +700,8 @@ ALTER TABLE `ticket_status_logs`
 ALTER TABLE `users`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `id_number` (`id_number`),
-  ADD UNIQUE KEY `email` (`email`);
+  ADD UNIQUE KEY `email` (`email`),
+  ADD KEY `users_service_category_idx` (`service_category_id`);
 
 --
 -- AUTO_INCREMENT for dumped tables
@@ -708,7 +711,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `activity_logs`
 --
 ALTER TABLE `activity_logs`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
 
 --
 -- AUTO_INCREMENT for table `email_logs`
@@ -931,6 +934,12 @@ ALTER TABLE `ticket_reopen_logs`
 ALTER TABLE `ticket_status_logs`
   ADD CONSTRAINT `ticket_status_logs_ticket_fk` FOREIGN KEY (`ticket_id`) REFERENCES `tickets` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `ticket_status_logs_user_fk` FOREIGN KEY (`changed_by`) REFERENCES `users` (`id`);
+
+--
+-- Constraints for table `users`
+--
+ALTER TABLE `users`
+  ADD CONSTRAINT `users_service_category_fk` FOREIGN KEY (`service_category_id`) REFERENCES `service_categories` (`id`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

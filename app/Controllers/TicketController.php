@@ -56,7 +56,7 @@ class TicketController extends Controller
             'attachments' => $ticketModel->attachments((int) $id),
             'feedback' => $ticketModel->feedback((int) $id),
             'histories' => $ticketModel->histories((int) $id),
-            'technicalUsers' => (new User())->technicalActive(),
+            'technicalUsers' => (new User())->technicalActive((int) $ticket['service_category_id']),
             'library' => new Library(),
             'statuses' => $ticketModel->availableTechnicalStatuses((int) $id),
         ]);
@@ -75,7 +75,8 @@ class TicketController extends Controller
 
         $assignedTo = Auth::canManage() ? (int) ($_POST['assigned_to'] ?? 0) : Auth::id();
         $role = Auth::canManage() ? ($_POST['assignment_role'] ?? 'primary') : 'primary';
-        if (!$assignedTo || ($ticket['assigned_to'] && $role === 'primary') || in_array($ticket['status'], ['Completed', 'Confirmed Completed', 'Cancelled'], true)) {
+        $userModel = new User();
+        if (!$assignedTo || !$userModel->activeTechnicalCanHandle($assignedTo, (int) $ticket['service_category_id']) || ($ticket['assigned_to'] && $role === 'primary') || in_array($ticket['status'], ['Completed', 'Confirmed Completed', 'Cancelled'], true)) {
             flash('error', 'This ticket cannot be assigned by your account.');
             $this->redirect('tickets/' . $ticketId);
         }
@@ -83,7 +84,7 @@ class TicketController extends Controller
         $ticketModel = new Ticket();
         $ticketModel->assign($ticketId, $assignedTo, Auth::id(), trim($_POST['notes'] ?? '') ?: null, $role);
         $updated = $ticketModel->find($ticketId);
-        $assignee = (new User())->find($assignedTo);
+        $assignee = $userModel->find($assignedTo);
         $mailer = new EmailService();
         $mailer->assignment($updated, $assignee);
         $mailer->assignmentRequester($updated, $assignee);
@@ -106,14 +107,15 @@ class TicketController extends Controller
         $ticket = (new Ticket())->find($ticketId);
         $assignedTo = (int) ($_POST['assigned_to'] ?? 0);
         $reason = trim($_POST['reason'] ?? '');
-        if (!$ticket || !$assignedTo || $reason === '' || in_array($ticket['status'], ['Completed', 'Confirmed Completed', 'Cancelled'], true)) {
+        $userModel = new User();
+        if (!$ticket || !$assignedTo || !$userModel->activeTechnicalCanHandle($assignedTo, (int) $ticket['service_category_id']) || $reason === '' || in_array($ticket['status'], ['Completed', 'Confirmed Completed', 'Cancelled'], true)) {
             flash('error', 'Reassignment requires a new primary assignee and reason.');
             $this->redirect('tickets/' . $ticketId);
         }
 
         $ticketModel = new Ticket();
         $ticketModel->reassign($ticketId, $assignedTo, Auth::id(), $reason, trim($_POST['notes'] ?? '') ?: null);
-        $assignee = (new User())->find($assignedTo);
+        $assignee = $userModel->find($assignedTo);
         (new Notification())->create($assignedTo, 'Ticket reassigned to you', $ticketModel->find($ticketId)['ticket_no'] . ' has been reassigned to you.', 'tickets/' . $ticketId);
         ActivityLogger::log('Ticket reassignment', 'ticket', (string) $ticketId, 'Reassigned to ' . ($assignee['name'] ?? 'technical personnel') . '. Reason: ' . $reason);
         flash('success', 'Ticket reassigned successfully.');

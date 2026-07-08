@@ -11,6 +11,10 @@
             <input class="form-control" value="<?= e(ucwords(str_replace('_', ' ', $user['role']))) ?>" disabled>
         </div>
         <div class="col-md-6">
+            <label class="form-label">Service Category</label>
+            <input class="form-control" value="<?= e($user['service_category_name'] ?? 'None') ?>" disabled>
+        </div>
+        <div class="col-md-6">
             <label class="form-label">Name <span class="text-danger">*</span></label>
             <input name="name" class="form-control" required value="<?= e($user['name']) ?>">
         </div>

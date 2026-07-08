@@ -15,6 +15,16 @@
             </select>
         </div>
         <div class="col-md-4">
+            <label class="form-label">Service Category</label>
+            <select name="service_category_id" class="form-select">
+                <option value="">None</option>
+                <?php foreach ($categories as $category): ?>
+                    <option value="<?= (int) $category['id'] ?>" <?= ((int)($user['service_category_id'] ?? 0) === (int)$category['id']) ? 'selected' : '' ?>><?= e($category['name']) ?></option>
+                <?php endforeach; ?>
+            </select>
+            <div class="form-text">Required for unit heads and technical personnel.</div>
+        </div>
+        <div class="col-md-4">
             <label class="form-label">Status</label>
             <select name="status" class="form-select">
                 <?php foreach (['active', 'inactive'] as $status): ?>

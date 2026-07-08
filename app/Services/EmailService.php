@@ -110,6 +110,27 @@ class EmailService
         $this->send((int) $ticket['id'], ICT_NOTIFICATION_EMAIL, 'New ICTSD Request - ' . $ticket['ticket_no'], $body);
     }
 
+    public function submissionUnitHeads(array $ticket, array $unitHeads): void
+    {
+        foreach ($unitHeads as $unitHead) {
+            if (empty($unitHead['email'])) {
+                continue;
+            }
+
+            $body = '<p>Good day ' . e($unitHead['name']) . ',</p>'
+                . '<p>A new ICTSD request was submitted under your service category.</p>'
+                . '<p>'
+                . '<strong>Ticket No:</strong> ' . e($ticket['ticket_no']) . '<br>'
+                . '<strong>Requester:</strong> ' . e($ticket['requester_name']) . '<br>'
+                . '<strong>Email Address:</strong> ' . e($ticket['requester_email']) . '<br>'
+                . '<strong>Category:</strong> ' . e($ticket['category_name']) . '<br>'
+                . '<strong>Specific Request:</strong> ' . e($ticket['service_name']) . '<br>'
+                . '<strong>Description:</strong> ' . nl2br(e($ticket['description']))
+                . '</p>';
+            $this->send((int) $ticket['id'], $unitHead['email'], 'New ICTSD Request for Your Unit - ' . $ticket['ticket_no'], $body);
+        }
+    }
+
     public function assignment(array $ticket, array $assignee): void
     {
         $contactLine = trim((string) ($ticket['requester_contact'] ?? '')) !== ''

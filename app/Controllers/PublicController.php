@@ -50,10 +50,11 @@ class PublicController extends Controller
         $mailer = new EmailService();
         $mailer->submissionRequester($ticket);
         $mailer->submissionIct($ticket);
+        $unitHeads = (new User())->unitHeadsByServiceCategory((int) $ticket['service_category_id']);
+        $mailer->submissionUnitHeads($ticket, $unitHeads);
 
-        $supervisors = (new User())->supervisors();
         (new Notification())->createForUsers(
-            array_column($supervisors, 'id'),
+            array_column($unitHeads, 'id'),
             'New ticket submitted',
             $ticket['ticket_no'] . ' was submitted by ' . $ticket['requester_name'] . '.',
             'tickets/' . $ticketId

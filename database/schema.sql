@@ -33,10 +33,12 @@ CREATE TABLE users (
     email VARCHAR(190) NOT NULL UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
     role ENUM('technical','unit_head','division_chief','admin') NOT NULL DEFAULT 'technical',
+    service_category_id INT UNSIGNED NULL,
     status ENUM('active','inactive') NOT NULL DEFAULT 'active',
     last_login_at DATETIME NULL,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME NULL ON UPDATE CURRENT_TIMESTAMP
+    updated_at DATETIME NULL ON UPDATE CURRENT_TIMESTAMP,
+    INDEX users_service_category_idx (service_category_id)
 ) ENGINE=InnoDB;
 
 CREATE TABLE service_categories (
@@ -45,6 +47,9 @@ CREATE TABLE service_categories (
     status ENUM('active','inactive') NOT NULL DEFAULT 'active',
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
+
+ALTER TABLE users
+    ADD CONSTRAINT users_service_category_fk FOREIGN KEY (service_category_id) REFERENCES service_categories(id);
 
 CREATE TABLE service_items (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -306,15 +311,15 @@ CREATE TABLE settings (
     updated_at DATETIME NULL ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
 
-INSERT INTO users (id_number, name, position, email, password_hash, role, status) VALUES
-('TECH-001', 'Temporary Technical User', 'ICT Support Staff', 'tech@nfa.gov.ph', '$2y$10$atcIkMqtOWtfbckbbDIJG.HQGLdvD0R.jhjDEIj1pNxN/CSl79oQG', 'technical', 'inactive'),
-('HEAD-001', 'Temporary Unit Head', 'Unit Head', 'unithead@nfa.gov.ph', '$2y$10$atcIkMqtOWtfbckbbDIJG.HQGLdvD0R.jhjDEIj1pNxN/CSl79oQG', 'unit_head', 'inactive'),
-('CHIEF-001', 'Temporary Division Chief', 'Division Chief', 'chief@nfa.gov.ph', '$2y$10$atcIkMqtOWtfbckbbDIJG.HQGLdvD0R.jhjDEIj1pNxN/CSl79oQG', 'division_chief', 'inactive'),
-('ADMIN-001', 'Temporary Administrator', 'System Administrator', 'admin@nfa.gov.ph', '$2y$10$atcIkMqtOWtfbckbbDIJG.HQGLdvD0R.jhjDEIj1pNxN/CSl79oQG', 'admin', 'inactive');
-
 INSERT INTO service_categories (name) VALUES
 ('Hardware and Network Infrastructure'),
 ('Systems and Application');
+
+INSERT INTO users (id_number, name, position, email, password_hash, role, service_category_id, status) VALUES
+('TECH-001', 'Temporary Technical User', 'ICT Support Staff', 'tech@nfa.gov.ph', '$2y$10$atcIkMqtOWtfbckbbDIJG.HQGLdvD0R.jhjDEIj1pNxN/CSl79oQG', 'technical', 1, 'inactive'),
+('HEAD-001', 'Temporary Unit Head', 'Unit Head', 'unithead@nfa.gov.ph', '$2y$10$atcIkMqtOWtfbckbbDIJG.HQGLdvD0R.jhjDEIj1pNxN/CSl79oQG', 'unit_head', 1, 'inactive'),
+('CHIEF-001', 'Temporary Division Chief', 'Division Chief', 'chief@nfa.gov.ph', '$2y$10$atcIkMqtOWtfbckbbDIJG.HQGLdvD0R.jhjDEIj1pNxN/CSl79oQG', 'division_chief', NULL, 'inactive'),
+('ADMIN-001', 'Temporary Administrator', 'System Administrator', 'admin@nfa.gov.ph', '$2y$10$atcIkMqtOWtfbckbbDIJG.HQGLdvD0R.jhjDEIj1pNxN/CSl79oQG', 'admin', NULL, 'inactive');
 
 INSERT INTO service_items (service_category_id, name, default_priority) VALUES
 (1, 'Certifications', 'Low'),
