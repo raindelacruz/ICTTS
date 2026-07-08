@@ -32,6 +32,14 @@ class Library extends Model
         return $stmt->fetchAll();
     }
 
+    public function serviceCategory(int $id): ?array
+    {
+        $stmt = $this->db->prepare('SELECT * FROM service_categories WHERE id = ?');
+        $stmt->execute([$id]);
+        $category = $stmt->fetch();
+        return $category ?: null;
+    }
+
     public function serviceItems(?int $categoryId = null): array
     {
         if ($categoryId) {
@@ -92,6 +100,10 @@ class Library extends Model
             $where[] = 'si.service_category_id = ?';
             $params[] = $filters['item_category_id'];
         }
+        if (($filters['item_priority'] ?? '') !== '') {
+            $where[] = 'si.default_priority = ?';
+            $params[] = $filters['item_priority'];
+        }
         if (($filters['item_status'] ?? '') !== '') {
             $where[] = 'si.status = ?';
             $params[] = $filters['item_status'];
@@ -100,10 +112,18 @@ class Library extends Model
         $stmt = $this->db->prepare(
             'SELECT si.*, sc.name AS category_name FROM service_items si JOIN service_categories sc ON sc.id = si.service_category_id'
             . ($where ? ' WHERE ' . implode(' AND ', $where) : '')
-            . ' ORDER BY sc.name, si.name'
+            . ' ORDER BY sc.name, si.name LIMIT 10'
         );
         $stmt->execute($params);
         return $stmt->fetchAll();
+    }
+
+    public function serviceItemCategoryId(int $id): ?int
+    {
+        $stmt = $this->db->prepare('SELECT service_category_id FROM service_items WHERE id = ?');
+        $stmt->execute([$id]);
+        $categoryId = $stmt->fetchColumn();
+        return $categoryId === false ? null : (int) $categoryId;
     }
 
     public function officesForManagement(array $filters = []): array

@@ -59,6 +59,7 @@ class Router
             ['GET', 'users/{id}/edit', [UserController::class, 'edit']],
             ['POST', 'users/{id}/update', [UserController::class, 'update']],
             ['GET', 'libraries/services', [LibraryController::class, 'services']],
+            ['GET', 'libraries/services/{id}', [LibraryController::class, 'serviceCategory']],
             ['POST', 'libraries/service-categories', [LibraryController::class, 'storeServiceCategory']],
             ['POST', 'libraries/service-categories/{id}/update', [LibraryController::class, 'updateServiceCategory']],
             ['POST', 'libraries/service-categories/{id}/delete', [LibraryController::class, 'deleteServiceCategory']],

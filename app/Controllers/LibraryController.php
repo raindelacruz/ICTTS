@@ -19,9 +19,27 @@ class LibraryController extends Controller
         $library = new Library();
         $this->view('libraries/services', [
             'categories' => $library->allCategories($_GET),
-            'activeCategories' => $library->categories(),
-            'items' => $library->serviceItemsForManagement($_GET),
             'filters' => $_GET,
+        ]);
+    }
+
+    public function serviceCategory(string $id): void
+    {
+        Auth::requireRole(['admin']);
+        $library = new Library();
+        $category = $library->serviceCategory((int) $id);
+        if (!$category) {
+            flash('error', 'Service category not found.');
+            $this->redirect('libraries/services');
+        }
+
+        $filters = $_GET;
+        $filters['item_category_id'] = (string) $category['id'];
+
+        $this->view('libraries/service_category', [
+            'category' => $category,
+            'items' => $library->serviceItemsForManagement($filters),
+            'filters' => $filters,
             'priorities' => Ticket::PRIORITIES,
         ]);
     }
@@ -60,30 +78,34 @@ class LibraryController extends Controller
     {
         Auth::requireRole(['admin']);
         Csrf::validate($_POST['_csrf'] ?? null);
-        (new Library())->addServiceItemWithPriority((int) $_POST['service_category_id'], trim($_POST['name']), $_POST['default_priority'] ?? 'Medium');
+        $categoryId = (int) $_POST['service_category_id'];
+        (new Library())->addServiceItemWithPriority($categoryId, trim($_POST['name']), $_POST['default_priority'] ?? 'Medium');
         ActivityLogger::log('Service library change', 'service_item', null, 'Service item added.');
         flash('success', 'Service item added.');
-        $this->redirect('libraries/services');
+        $this->redirect('libraries/services/' . $categoryId);
     }
 
     public function updateServiceItem(string $id): void
     {
         Auth::requireRole(['admin']);
         Csrf::validate($_POST['_csrf'] ?? null);
-        (new Library())->updateServiceItemWithPriority((int) $id, (int) $_POST['service_category_id'], trim($_POST['name'] ?? ''), $_POST['status'] ?? 'active', $_POST['default_priority'] ?? 'Medium');
+        $categoryId = (int) $_POST['service_category_id'];
+        (new Library())->updateServiceItemWithPriority((int) $id, $categoryId, trim($_POST['name'] ?? ''), $_POST['status'] ?? 'active', $_POST['default_priority'] ?? 'Medium');
         ActivityLogger::log('Service library change', 'service_item', $id, 'Service item updated.');
         flash('success', 'Service item updated.');
-        $this->redirect('libraries/services');
+        $this->redirect('libraries/services/' . $categoryId);
     }
 
     public function deleteServiceItem(string $id): void
     {
         Auth::requireRole(['admin']);
         Csrf::validate($_POST['_csrf'] ?? null);
-        (new Library())->deleteServiceItem((int) $id);
+        $library = new Library();
+        $categoryId = $library->serviceItemCategoryId((int) $id);
+        $library->deleteServiceItem((int) $id);
         ActivityLogger::log('Service library change', 'service_item', $id, 'Service item deleted.');
         flash('success', 'Service item deleted.');
-        $this->redirect('libraries/services');
+        $this->redirect($categoryId ? 'libraries/services/' . $categoryId : 'libraries/services');
     }
 
     public function locations(): void
