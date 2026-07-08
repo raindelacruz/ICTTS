@@ -40,12 +40,12 @@ function load_env_file(string $path): void
 
 function env_value(string $key, string $default = ''): string
 {
-    $value = getenv($key);
-    if ($value === false && isset($_ENV[$key])) {
-        $value = $_ENV[$key];
-    }
+    $value = $_ENV[$key] ?? false;
     if ($value === false && isset($_SERVER[$key])) {
         $value = $_SERVER[$key];
+    }
+    if ($value === false) {
+        $value = getenv($key);
     }
 
     if ($value === false || $value === null) {
