@@ -30,6 +30,10 @@ body {
     flex: 0 0 260px;
 }
 
+.sidebar-backdrop {
+    display: none;
+}
+
 .sidebar-brand,
 .brand-lockup,
 .topbar-title,
@@ -115,6 +119,34 @@ body {
     justify-content: space-between;
     gap: 1rem;
     padding: 0 1rem;
+}
+
+.topbar-title {
+    min-width: 0;
+}
+
+.topbar-title .fw-semibold {
+    line-height: 1.2;
+}
+
+.menu-toggle {
+    display: none;
+    width: 40px;
+    height: 38px;
+    padding: 0;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 4px;
+    flex: 0 0 auto;
+}
+
+.menu-toggle span {
+    display: block;
+    width: 18px;
+    height: 2px;
+    border-radius: 2px;
+    background: currentColor;
 }
 
 .topbar-actions {
@@ -272,6 +304,73 @@ body {
     padding: .75rem;
 }
 
+.filter-panel {
+    background: #fff;
+    border: 1px solid var(--border-soft);
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    overflow: hidden;
+}
+
+.filter-panel .filter-bar {
+    border: 0;
+    border-radius: 0;
+    margin-bottom: 0 !important;
+}
+
+.filter-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .75rem;
+    padding: .75rem .9rem;
+    border-bottom: 1px solid var(--border-soft);
+}
+
+.filter-panel-title {
+    font-weight: 700;
+    font-size: .92rem;
+}
+
+.filter-panel-summary {
+    color: #667085;
+    font-size: .82rem;
+}
+
+.filter-toggle {
+    min-width: 88px;
+}
+
+.table-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .75rem;
+    padding: .75rem .9rem;
+    border-top: 1px solid var(--border-soft);
+    background: #fff;
+}
+
+.table-pagination-info {
+    color: #667085;
+    font-size: .86rem;
+}
+
+.table-pagination .btn {
+    min-width: 38px;
+}
+
+.password-toggle {
+    min-width: 44px;
+}
+
+.password-toggle svg {
+    display: block;
+    width: 18px;
+    height: 18px;
+    margin: 0 auto;
+}
+
 .timeline-item {
     border-left: 3px solid #d7e1ea;
     padding-left: .85rem;
@@ -285,26 +384,42 @@ body {
 
 @media (max-width: 900px) {
     .app-shell {
-        display: block;
+        display: flex;
     }
 
     .sidebar {
-        width: 100%;
-        min-height: auto;
-        position: sticky;
+        position: fixed;
         top: 0;
-        z-index: 1020;
+        left: 0;
+        bottom: 0;
+        z-index: 1040;
+        width: min(82vw, 300px);
+        min-height: 100vh;
+        transform: translateX(-100%);
+        transition: transform .2s ease;
+        box-shadow: 16px 0 36px rgba(16, 24, 40, .18);
+        overflow-y: auto;
     }
 
     .sidebar .nav {
-        flex-direction: row !important;
-        overflow-x: auto;
         gap: .25rem;
-        scrollbar-width: thin;
     }
 
     .sidebar .nav-link {
-        white-space: nowrap;
+        white-space: normal;
+        padding: .7rem .85rem;
+    }
+
+    body.nav-open .sidebar {
+        transform: translateX(0);
+    }
+
+    body.nav-open .sidebar-backdrop {
+        display: block;
+        position: fixed;
+        inset: 0;
+        z-index: 1035;
+        background: rgba(15, 23, 42, .42);
     }
 
     .sidebar-brand {
@@ -318,12 +433,20 @@ body {
 
     .topbar {
         min-height: auto;
-        align-items: flex-start;
+        align-items: center;
         padding: .85rem 1rem;
+    }
+
+    .menu-toggle {
+        display: inline-flex;
     }
 
     .topbar-logo {
         display: block;
+    }
+
+    .main-area {
+        width: 100%;
     }
 }
 
@@ -378,6 +501,11 @@ body {
 
     .topbar {
         flex-direction: column;
+        align-items: stretch;
+    }
+
+    .topbar-title {
+        width: 100%;
     }
 
     .topbar-actions > form,
@@ -405,5 +533,20 @@ body {
 
     .table {
         min-width: 720px;
+    }
+
+    .filter-panel-header,
+    .table-pagination {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .filter-panel-header .btn,
+    .table-pagination .btn-group {
+        width: 100%;
+    }
+
+    .table-pagination .btn-group .btn {
+        flex: 1 1 0;
     }
 }

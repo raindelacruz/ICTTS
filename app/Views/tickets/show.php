@@ -32,7 +32,7 @@
                 <?php foreach ($attachments as $attachment): ?>
                     <div class="d-flex justify-content-between border-bottom py-2">
                         <div>
-                            <a href="<?= url($attachment['file_path']) ?>" target="_blank"><?= e($attachment['original_name']) ?></a>
+                            <a href="<?= url('tickets/attachments/' . $attachment['id'] . '/download') ?>"><?= e($attachment['original_name']) ?></a>
                             <small class="text-muted d-block"><?= e($attachment['source']) ?> upload by <?= e($attachment['uploaded_by_name'] ?: 'System/User') ?> at <?= e($attachment['created_at']) ?></small>
                         </div>
                         <small class="text-muted"><?= number_format(((int) $attachment['file_size']) / 1024, 1) ?> KB</small>

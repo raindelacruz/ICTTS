@@ -307,10 +307,10 @@ CREATE TABLE settings (
 ) ENGINE=InnoDB;
 
 INSERT INTO users (id_number, name, position, email, password_hash, role, status) VALUES
-('TECH-001', 'Temporary Technical User', 'ICT Support Staff', 'tech@nfa.gov.ph', '$2y$10$atcIkMqtOWtfbckbbDIJG.HQGLdvD0R.jhjDEIj1pNxN/CSl79oQG', 'technical', 'active'),
-('HEAD-001', 'Temporary Unit Head', 'Unit Head', 'unithead@nfa.gov.ph', '$2y$10$atcIkMqtOWtfbckbbDIJG.HQGLdvD0R.jhjDEIj1pNxN/CSl79oQG', 'unit_head', 'active'),
-('CHIEF-001', 'Temporary Division Chief', 'Division Chief', 'chief@nfa.gov.ph', '$2y$10$atcIkMqtOWtfbckbbDIJG.HQGLdvD0R.jhjDEIj1pNxN/CSl79oQG', 'division_chief', 'active'),
-('ADMIN-001', 'Temporary Administrator', 'System Administrator', 'admin@nfa.gov.ph', '$2y$10$atcIkMqtOWtfbckbbDIJG.HQGLdvD0R.jhjDEIj1pNxN/CSl79oQG', 'admin', 'active');
+('TECH-001', 'Temporary Technical User', 'ICT Support Staff', 'tech@nfa.gov.ph', '$2y$10$atcIkMqtOWtfbckbbDIJG.HQGLdvD0R.jhjDEIj1pNxN/CSl79oQG', 'technical', 'inactive'),
+('HEAD-001', 'Temporary Unit Head', 'Unit Head', 'unithead@nfa.gov.ph', '$2y$10$atcIkMqtOWtfbckbbDIJG.HQGLdvD0R.jhjDEIj1pNxN/CSl79oQG', 'unit_head', 'inactive'),
+('CHIEF-001', 'Temporary Division Chief', 'Division Chief', 'chief@nfa.gov.ph', '$2y$10$atcIkMqtOWtfbckbbDIJG.HQGLdvD0R.jhjDEIj1pNxN/CSl79oQG', 'division_chief', 'inactive'),
+('ADMIN-001', 'Temporary Administrator', 'System Administrator', 'admin@nfa.gov.ph', '$2y$10$atcIkMqtOWtfbckbbDIJG.HQGLdvD0R.jhjDEIj1pNxN/CSl79oQG', 'admin', 'inactive');
 
 INSERT INTO service_categories (name) VALUES
 ('Hardware and Network Infrastructure'),

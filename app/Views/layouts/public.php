@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><?= e(APP_NAME) ?></title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="<?= asset('css/app.css') ?>?v=20260523-2" rel="stylesheet">
+    <link href="<?= asset('css/app.css') ?>?v=20260708-1" rel="stylesheet">
 </head>
 <body class="public-bg">
 <nav class="navbar navbar-expand-lg bg-white border-bottom public-navbar">
@@ -22,6 +22,6 @@
 </main>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>window.ICTTS_BASE_URL = '<?= e(BASE_URL) ?>';</script>
-<script src="<?= asset('js/app.js') ?>"></script>
+<script src="<?= asset('js/app.js') ?>?v=20260708-1"></script>
 </body>
 </html>

@@ -5,11 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><?= e(APP_NAME) ?></title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="<?= asset('css/app.css') ?>?v=20260523-3" rel="stylesheet">
+    <link href="<?= asset('css/app.css') ?>?v=20260708-1" rel="stylesheet">
 </head>
 <body>
 <div class="app-shell">
-    <aside class="sidebar">
+    <div class="sidebar-backdrop" data-menu-close></div>
+    <aside class="sidebar" id="appSidebar">
         <div class="sidebar-brand border-bottom">
             <img src="<?= asset('img/logo-nfa-da.jpg') ?>" alt="Department of Agriculture and National Food Authority logo" class="sidebar-logo brand-mark">
             <div>
@@ -33,6 +34,11 @@
     <div class="main-area">
         <header class="topbar">
             <div class="topbar-title">
+                <button class="btn btn-outline-secondary btn-sm menu-toggle" type="button" aria-label="Open menu" aria-controls="appSidebar" aria-expanded="false" data-menu-toggle>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
                 <img src="<?= asset('img/logo-nfa-da.jpg') ?>" alt="" class="topbar-logo brand-mark">
                 <div>
                 <div class="fw-semibold"><?= e(APP_NAME) ?></div>
@@ -102,6 +108,6 @@
 </div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>window.ICTTS_BASE_URL = '<?= e(BASE_URL) ?>';</script>
-<script src="<?= asset('js/app.js') ?>"></script>
+<script src="<?= asset('js/app.js') ?>?v=20260708-1"></script>
 </body>
 </html>

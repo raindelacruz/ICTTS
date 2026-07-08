@@ -54,7 +54,7 @@ class Ticket extends Model
 
     public function findByToken(string $token): ?array
     {
-        $stmt = $this->db->prepare($this->baseSelect() . ' JOIN requester_confirmation_tokens rct ON rct.ticket_id = t.id WHERE rct.token_hash = ? AND rct.used_at IS NULL AND rct.expires_at > NOW()');
+        $stmt = $this->db->prepare($this->baseSelect() . ' JOIN requester_confirmation_tokens rct ON rct.ticket_id = t.id WHERE rct.token_hash = ? AND rct.used_at IS NULL AND rct.expires_at > NOW() AND t.status = "Completed"');
         $stmt->execute([hash('sha256', $token)]);
         return $stmt->fetch() ?: null;
     }
@@ -159,15 +159,24 @@ class Ticket extends Model
     public function createConfirmationToken(int $ticketId): string
     {
         $token = bin2hex(random_bytes(32));
+        $this->db->beginTransaction();
+        $stmt = $this->db->prepare('UPDATE requester_confirmation_tokens SET used_at = NOW() WHERE ticket_id = ? AND used_at IS NULL');
+        $stmt->execute([$ticketId]);
         $stmt = $this->db->prepare('INSERT INTO requester_confirmation_tokens (ticket_id, token_hash, expires_at) VALUES (?, ?, DATE_ADD(NOW(), INTERVAL 14 DAY))');
         $stmt->execute([$ticketId, hash('sha256', $token)]);
+        $this->db->commit();
         return $token;
     }
 
     public function confirmByToken(string $token, array $feedback): ?array
     {
-        $ticket = $this->findByToken($token);
+        $tokenHash = hash('sha256', $token);
+        $stmt = $this->db->prepare($this->baseSelect() . ' JOIN requester_confirmation_tokens rct ON rct.ticket_id = t.id WHERE rct.token_hash = ? AND rct.used_at IS NULL AND rct.expires_at > NOW() AND t.status = "Completed" FOR UPDATE');
+        $this->db->beginTransaction();
+        $stmt->execute([$tokenHash]);
+        $ticket = $stmt->fetch() ?: null;
         if (!$ticket) {
+            $this->db->rollBack();
             return null;
         }
 
@@ -176,9 +185,8 @@ class Ticket extends Model
         $comments = trim($feedback['feedback_comments'] ?? '') ?: null;
         $newStatus = $resolved === 'yes' ? 'Confirmed Completed' : self::RETURNED_STATUS;
 
-        $this->db->beginTransaction();
         $stmt = $this->db->prepare('UPDATE requester_confirmation_tokens SET used_at = NOW() WHERE token_hash = ? AND used_at IS NULL');
-        $stmt->execute([hash('sha256', $token)]);
+        $stmt->execute([$tokenHash]);
         $stmt = $this->db->prepare('UPDATE tickets SET status = ?, requester_confirmed_at = CASE WHEN ? = "Confirmed Completed" THEN NOW() ELSE requester_confirmed_at END, closed_at = CASE WHEN ? = "Confirmed Completed" THEN NOW() ELSE closed_at END WHERE id = ?');
         $stmt->execute([$newStatus, $newStatus, $newStatus, (int) $ticket['id']]);
         $stmt = $this->db->prepare('INSERT INTO ticket_feedback (ticket_id, rating, resolved_yes_no, feedback_comments, submitted_by_name) VALUES (?, ?, ?, ?, ?)');
@@ -187,9 +195,10 @@ class Ticket extends Model
             $this->logReopen((int) $ticket['id'], $ticket['status'], self::RETURNED_STATUS, null, 'Public Requester', $comments ?: 'Requester returned the ticket for further action.');
         }
         $this->logStatus((int) $ticket['id'], $ticket['status'], $newStatus, null, 'Public Requester', $resolved === 'yes' ? 'Requester confirmed completion.' : 'Requester returned the ticket for further action.');
+        $ticketId = (int) $ticket['id'];
         $this->db->commit();
 
-        return $this->find((int) $ticket['id']);
+        return $this->find($ticketId);
     }
 
     public function reopen(int $ticketId, int $userId, string $reason, string $newStatus = self::RETURNED_STATUS): void
@@ -241,7 +250,7 @@ class Ticket extends Model
             return 'Unsupported attachment type: ' . ($file['name'] ?? 'file') . '.';
         }
 
-        $root = dirname(__DIR__, 2) . DIRECTORY_SEPARATOR . 'public' . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR . 'tickets' . DIRECTORY_SEPARATOR . $ticketId;
+        $root = dirname(__DIR__, 2) . DIRECTORY_SEPARATOR . 'storage' . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR . 'tickets' . DIRECTORY_SEPARATOR . $ticketId;
         if (!is_dir($root) && !mkdir($root, 0755, true) && !is_dir($root)) {
             return 'Unable to create attachment directory.';
         }
@@ -252,7 +261,7 @@ class Ticket extends Model
             return 'Unable to store attachment.';
         }
 
-        $relativePath = 'uploads/tickets/' . $ticketId . '/' . $stored;
+        $relativePath = 'storage/uploads/tickets/' . $ticketId . '/' . $stored;
         $stmt = $this->db->prepare('INSERT INTO ticket_attachments (ticket_id, uploaded_by, uploaded_by_name, source, original_name, stored_name, file_path, mime_type, file_size, remarks) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
         $stmt->execute([$ticketId, $uploadedBy, $uploadedByName, $source, $file['name'], $stored, $relativePath, $mime, (int) $file['size'], $remarks]);
         $this->logStatus($ticketId, null, 'Attachment Added', $uploadedBy, $uploadedByName, 'Attachment uploaded: ' . $file['name']);
@@ -264,6 +273,29 @@ class Ticket extends Model
         $stmt = $this->db->prepare('SELECT * FROM ticket_attachments WHERE ticket_id = ? ORDER BY created_at DESC');
         $stmt->execute([$ticketId]);
         return $stmt->fetchAll();
+    }
+
+    public function attachment(int $attachmentId): ?array
+    {
+        $stmt = $this->db->prepare('SELECT * FROM ticket_attachments WHERE id = ? LIMIT 1');
+        $stmt->execute([$attachmentId]);
+        return $stmt->fetch() ?: null;
+    }
+
+    public function attachmentAbsolutePath(array $attachment): ?string
+    {
+        $path = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, (string) ($attachment['file_path'] ?? ''));
+        $root = dirname(__DIR__, 2);
+
+        if (str_starts_with($path, 'storage' . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR)) {
+            return $root . DIRECTORY_SEPARATOR . $path;
+        }
+
+        if (str_starts_with($path, 'uploads' . DIRECTORY_SEPARATOR . 'tickets' . DIRECTORY_SEPARATOR)) {
+            return $root . DIRECTORY_SEPARATOR . 'public' . DIRECTORY_SEPARATOR . $path;
+        }
+
+        return null;
     }
 
     public function feedback(int $ticketId): array

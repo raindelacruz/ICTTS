@@ -7,6 +7,7 @@ namespace App\Controllers;
 use App\Core\Auth;
 use App\Core\Controller;
 use App\Core\Csrf;
+use App\Core\RateLimiter;
 use App\Models\User;
 use App\Services\ActivityLogger;
 
@@ -25,6 +26,11 @@ class AuthController extends Controller
     public function register(): void
     {
         Csrf::validate($_POST['_csrf'] ?? null);
+        if (!RateLimiter::hit('register:' . ($_SERVER['REMOTE_ADDR'] ?? 'unknown'), 5, 3600)) {
+            flash('error', 'Too many registration attempts. Please try again later.');
+            $this->redirect('register');
+        }
+
         $data = [
             'id_number' => trim($_POST['id_number'] ?? ''),
             'name' => trim($_POST['name'] ?? ''),
@@ -56,6 +62,12 @@ class AuthController extends Controller
         Csrf::validate($_POST['_csrf'] ?? null);
         $email = trim($_POST['email'] ?? '');
         $password = $_POST['password'] ?? '';
+        $limitKey = 'login:' . ($_SERVER['REMOTE_ADDR'] ?? 'unknown') . ':' . strtolower($email);
+        if (!RateLimiter::hit($limitKey, 5, 900)) {
+            flash('error', 'Too many login attempts. Please try again after 15 minutes.');
+            $this->redirect('login');
+        }
+
         $userModel = new User();
         $user = $userModel->findByEmail($email);
 
@@ -65,6 +77,7 @@ class AuthController extends Controller
         }
 
         Auth::login($user);
+        RateLimiter::clear($limitKey);
         $userModel->touchLogin((int) $user['id']);
         ActivityLogger::log('User login', 'user', (string) $user['id']);
         $this->redirect('dashboard');

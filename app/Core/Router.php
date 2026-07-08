@@ -45,6 +45,7 @@ class Router
             ['POST', 'tickets/{id}/reassign', [TicketController::class, 'reassign']],
             ['POST', 'tickets/{id}/status', [TicketController::class, 'updateStatus']],
             ['POST', 'tickets/{id}/attachments', [TicketController::class, 'attach']],
+            ['GET', 'tickets/attachments/{id}/download', [TicketController::class, 'downloadAttachment']],
             ['POST', 'tickets/{id}/endorse', [TicketController::class, 'endorse']],
             ['POST', 'tickets/{id}/reopen', [TicketController::class, 'reopen']],
             ['POST', 'tickets/escalate-overdue', [TicketController::class, 'escalateOverdue']],

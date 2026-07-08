@@ -1,5 +1,6 @@
 /vendor/
 /public/uploads/
+/storage/uploads/
 /.repo_git/
 /ictts.sql
 .env

@@ -43,6 +43,11 @@ class TicketController extends Controller
             http_response_code(404);
             exit('Ticket not found');
         }
+        if (!$this->canView($ticketModel, $ticket)) {
+            http_response_code(403);
+            exit('Forbidden');
+        }
+
         $this->view('tickets/show', [
             'ticket' => $ticket,
             'assignments' => $ticketModel->assignments((int) $id),
@@ -168,6 +173,38 @@ class TicketController extends Controller
         $this->redirect('tickets/' . $ticketId);
     }
 
+    public function downloadAttachment(string $id): void
+    {
+        Auth::requireLogin();
+
+        $ticketModel = new Ticket();
+        $attachment = $ticketModel->attachment((int) $id);
+        if (!$attachment) {
+            http_response_code(404);
+            exit('Attachment not found');
+        }
+
+        $ticket = $ticketModel->find((int) $attachment['ticket_id']);
+        if (!$ticket || !$this->canView($ticketModel, $ticket)) {
+            http_response_code(403);
+            exit('Forbidden');
+        }
+
+        $path = $ticketModel->attachmentAbsolutePath($attachment);
+        if ($path === null || !is_file($path) || !is_readable($path)) {
+            http_response_code(404);
+            exit('Attachment file not found');
+        }
+
+        $filename = preg_replace('/[^A-Za-z0-9._ -]/', '_', (string) $attachment['original_name']) ?: 'attachment';
+        header('Content-Type: ' . ($attachment['mime_type'] ?: 'application/octet-stream'));
+        header('Content-Length: ' . (string) filesize($path));
+        header('Content-Disposition: attachment; filename="' . addcslashes($filename, '"\\') . '"');
+        header('X-Content-Type-Options: nosniff');
+        readfile($path);
+        exit;
+    }
+
     public function endorse(string $id): void
     {
         Auth::requireRole(['admin', 'unit_head', 'division_chief']);
@@ -243,6 +280,16 @@ class TicketController extends Controller
     private function canUpdate(Ticket $ticketModel, array $ticket): bool
     {
         return (Auth::user()['role'] ?? '') === 'technical' && $ticketModel->canUserUpdate((int) $ticket['id'], Auth::id());
+    }
+
+    private function canView(Ticket $ticketModel, array $ticket): bool
+    {
+        if (Auth::canManage()) {
+            return true;
+        }
+
+        return (Auth::user()['role'] ?? '') === 'technical'
+            && $ticketModel->canUserUpdate((int) $ticket['id'], (int) Auth::id());
     }
 
     private function saveUploadedAttachments(Ticket $ticketModel, int $ticketId, string $source, ?string $remarks): ?string

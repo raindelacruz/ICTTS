@@ -6,6 +6,7 @@ namespace App\Controllers;
 
 use App\Core\Controller;
 use App\Core\Csrf;
+use App\Core\RateLimiter;
 use App\Models\Library;
 use App\Models\Notification;
 use App\Models\Ticket;
@@ -27,6 +28,11 @@ class PublicController extends Controller
     public function submitRequest(): void
     {
         Csrf::validate($_POST['_csrf'] ?? null);
+        if (!RateLimiter::hit('public_request:' . ($_SERVER['REMOTE_ADDR'] ?? 'unknown'), 10, 3600)) {
+            flash('error', 'Too many request submissions from this connection. Please try again later.');
+            $this->redirect('request');
+        }
+
         $data = $this->requestData();
         $errors = $this->validateRequest($data);
 
