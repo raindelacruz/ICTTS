@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 28, 2026 at 09:21 AM
+-- Generation Time: Jul 08, 2026 at 04:45 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -39,6 +39,30 @@ CREATE TABLE `activity_logs` (
   `created_at` datetime NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+--
+-- Dumping data for table `activity_logs`
+--
+
+INSERT INTO `activity_logs` (`id`, `user_id`, `actor_name`, `action`, `entity_type`, `entity_id`, `details`, `ip_address`, `created_at`) VALUES
+(1, 4, 'Administrator', 'User login', 'user', '4', NULL, '::1', '2026-07-08 09:52:02'),
+(2, 4, 'Administrator', 'User logout', 'user', '4', NULL, '::1', '2026-07-08 09:52:43'),
+(3, NULL, 'Rainier John Dela Cruz', 'ICT personnel registration', 'user', '5', 'Pending administrator activation.', '192.168.108.254', '2026-07-08 09:54:22'),
+(4, 4, 'Administrator', 'User login', 'user', '4', NULL, '192.168.108.254', '2026-07-08 09:54:51'),
+(5, 4, 'Administrator', 'User management changes', 'user', '5', 'User updated.', '192.168.108.254', '2026-07-08 09:55:04'),
+(6, 4, 'Administrator', 'User logout', 'user', '4', NULL, '192.168.108.254', '2026-07-08 09:55:11'),
+(7, 5, 'Rainier John Dela Cruz', 'User login', 'user', '5', NULL, '192.168.108.254', '2026-07-08 09:55:29'),
+(8, 5, 'Rainier John Dela Cruz', 'User logout', 'user', '5', NULL, '192.168.108.254', '2026-07-08 09:55:45'),
+(9, 4, 'Administrator', 'User login', 'user', '4', NULL, '192.168.108.254', '2026-07-08 09:55:58'),
+(10, 4, 'Administrator', 'User management changes', 'user', '5', 'User updated.', '192.168.108.254', '2026-07-08 09:56:10'),
+(11, 4, 'Administrator', 'User logout', 'user', '4', NULL, '192.168.108.254', '2026-07-08 09:56:11'),
+(12, 5, 'Rainier John Dela Cruz', 'User login', 'user', '5', NULL, '192.168.108.254', '2026-07-08 09:56:48'),
+(13, 5, 'Rainier John Dela Cruz', 'User logout', 'user', '5', NULL, '192.168.108.254', '2026-07-08 09:56:57'),
+(14, 5, 'Rainier John Dela Cruz', 'User login', 'user', '5', NULL, '192.168.108.254', '2026-07-08 09:57:37'),
+(15, 5, 'Rainier John Dela Cruz', 'User logout', 'user', '5', NULL, '192.168.108.254', '2026-07-08 10:08:49'),
+(16, 4, 'Administrator', 'User login', 'user', '4', NULL, '192.168.108.254', '2026-07-08 10:09:08'),
+(17, 4, 'Administrator', 'User login', 'user', '4', NULL, '::1', '2026-07-08 10:20:17'),
+(18, 4, 'Administrator', 'User login', 'user', '4', NULL, '192.168.108.254', '2026-07-08 10:20:42');
+
 -- --------------------------------------------------------
 
 --
@@ -55,6 +79,13 @@ CREATE TABLE `email_logs` (
   `error_message` text DEFAULT NULL,
   `created_at` datetime NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `email_logs`
+--
+
+INSERT INTO `email_logs` (`id`, `ticket_id`, `recipient_email`, `subject`, `body`, `status`, `error_message`, `created_at`) VALUES
+(1, NULL, 'tech.support@nfa.gov.ph', 'ICTTS SMTP Test', '<p>This is a test email from ICTTS SMTP configuration.</p>', 'sent', NULL, '2026-07-08 09:43:18');
 
 -- --------------------------------------------------------
 
@@ -494,10 +525,11 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `id_number`, `name`, `position`, `email`, `password_hash`, `role`, `status`, `last_login_at`, `created_at`, `updated_at`) VALUES
-(1, 'TECH-001', 'Temporary Technical User', 'ICT Support Staff', 'tech@nfa.gov.ph', '$2y$10$atcIkMqtOWtfbckbbDIJG.HQGLdvD0R.jhjDEIj1pNxN/CSl79oQG', 'technical', 'inactive', NULL, '2026-05-28 15:19:34', NULL),
-(2, 'HEAD-001', 'Temporary Unit Head', 'Unit Head', 'unithead@nfa.gov.ph', '$2y$10$atcIkMqtOWtfbckbbDIJG.HQGLdvD0R.jhjDEIj1pNxN/CSl79oQG', 'unit_head', 'inactive', NULL, '2026-05-28 15:19:34', NULL),
-(3, 'CHIEF-001', 'Temporary Division Chief', 'Division Chief', 'chief@nfa.gov.ph', '$2y$10$atcIkMqtOWtfbckbbDIJG.HQGLdvD0R.jhjDEIj1pNxN/CSl79oQG', 'division_chief', 'inactive', NULL, '2026-05-28 15:19:34', NULL),
-(4, 'ADMIN-001', 'Temporary Administrator', 'System Administrator', 'admin@nfa.gov.ph', '$2y$10$atcIkMqtOWtfbckbbDIJG.HQGLdvD0R.jhjDEIj1pNxN/CSl79oQG', 'admin', 'inactive', NULL, '2026-05-28 15:19:34', NULL);
+(1, 'TECH-001', 'Temporary Technical User', 'ICT Support Staff', 'tech@nfa.gov.ph', '$2y$10$atcIkMqtOWtfbckbbDIJG.HQGLdvD0R.jhjDEIj1pNxN/CSl79oQG', 'technical', 'active', NULL, '2026-05-28 15:19:34', NULL),
+(2, 'HEAD-001', 'Temporary Unit Head', 'Unit Head', 'unithead@nfa.gov.ph', '$2y$10$atcIkMqtOWtfbckbbDIJG.HQGLdvD0R.jhjDEIj1pNxN/CSl79oQG', 'unit_head', 'active', NULL, '2026-05-28 15:19:34', NULL),
+(3, 'CHIEF-001', 'Temporary Division Chief', 'Division Chief', 'chief@nfa.gov.ph', '$2y$10$atcIkMqtOWtfbckbbDIJG.HQGLdvD0R.jhjDEIj1pNxN/CSl79oQG', 'division_chief', 'active', NULL, '2026-05-28 15:19:34', NULL),
+(4, 'ADMIN-001', 'Administrator', 'System Administrator', 'tech.support@nfa.gov.ph', '$2y$10$atcIkMqtOWtfbckbbDIJG.HQGLdvD0R.jhjDEIj1pNxN/CSl79oQG', 'admin', 'active', '2026-07-08 10:20:42', '2026-05-28 15:19:34', '2026-07-08 10:20:42'),
+(5, '939908', 'Rainier John Dela Cruz', 'Information Systems Analysts III', 'rainier.delacruz@nfa.gov.ph', '$2y$10$YXogS8D8nHdmumUbDOgETOv1ks7obEWnAlmnuo34n0E9j2cDkP2tO', 'unit_head', 'active', '2026-07-08 09:57:37', '2026-07-08 09:54:22', '2026-07-08 09:57:37');
 
 --
 -- Indexes for dumped tables
@@ -676,13 +708,13 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `activity_logs`
 --
 ALTER TABLE `activity_logs`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
 
 --
 -- AUTO_INCREMENT for table `email_logs`
 --
 ALTER TABLE `email_logs`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `notifications`
@@ -784,7 +816,7 @@ ALTER TABLE `ticket_status_logs`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- Constraints for dumped tables
