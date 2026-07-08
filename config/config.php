@@ -20,7 +20,7 @@ function load_env_file(string $path): void
         }
 
         [$key, $value] = array_map('trim', explode('=', $line, 2));
-        if ($key === '' || getenv($key) !== false || isset($_ENV[$key]) || isset($_SERVER[$key])) {
+        if ($key === '') {
             continue;
         }
 
